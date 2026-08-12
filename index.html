@@ -2,39 +2,155 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MEDICAMENTOS JULIO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Medicamentos Julio</title>
+  <meta name="theme-color" content="#0d9488" />
+  <meta name="description" content="Lista de chequeo y recordatorios de medicamentos para Julio" />
   <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
-  <script defer src="app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <script defer src="app.js"></script>
 </head>
 <body>
-  <header class="header">
-    <h1>MEDICAMENTOS JULIO</h1>
-  </header>
+  <div class="app-container">
+    <!-- Header Principal -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="user-badge">
+          <div class="avatar">👨‍🦳</div>
+          <div>
+            <h1 class="app-title">Medicamentos Julio</h1>
+            <p class="today-date" id="current-date">Cargando fecha...</p>
+          </div>
+        </div>
+        <button id="install-header-btn" class="install-btn hidden">
+          <span>📲 Instalar</span>
+        </button>
+      </div>
 
-  <main class="container">
-    <section class="medicamentos">
-      <h2>Medicamentos</h2>
-      <ul id="med-list" class="list"></ul>
+      <!-- Barra de Progreso Diario -->
+      <div class="progress-card">
+        <div class="progress-info">
+          <span>Progreso de Hoy</span>
+          <span id="progress-text" class="progress-percent">0%</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <p id="progress-subtitle" class="progress-sub">0 de 6 medicamentos tomados</p>
+      </div>
+    </header>
+
+    <!-- Banner de Instalación Fácil -->
+    <section id="install-banner" class="install-banner">
+      <div class="install-banner-content">
+        <div class="install-icon">📲</div>
+        <div class="install-text">
+          <h3>¡Instálala en tu teléfono!</h3>
+          <p>Para abrirla con un solo toque sin buscar el enlace.</p>
+        </div>
+      </div>
+      <div class="install-actions">
+        <button id="install-app-btn" class="btn-primary-install">Instalar Ahora</button>
+        <button id="show-help-btn" class="btn-secondary-install">¿Cómo instalar?</button>
+      </div>
     </section>
 
-    <section class="ejercicios">
-      <h2>Recordatorio de ejercicios</h2>
-      <button id="ejercicio-btn" class="btn">Hacer ejercicio de cuerpo</button>
-    </section>
+    <!-- Pestañas de Navegación Rápida -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-filter="all">Todos (6)</button>
+      <button class="tab-btn" data-filter="pending">Pendientes</button>
+      <button class="tab-btn" data-filter="completed">Completados</button>
+    </nav>
 
-    <section class="om">
-      <h2>Recordatorio de "om" (meditación)</h2>
-      <button id="om-btn" class="btn">Practicar "om"</button>
-    </section>
-  </main>
+    <!-- Lista de Medicamentos -->
+    <main class="main-content">
+      <section class="section-container">
+        <div class="section-header">
+          <h2>💊 Medicamentos Diarios</h2>
+          <button id="reset-day-btn" class="reset-btn" title="Reiniciar día">🔄 Reiniciar día</button>
+        </div>
 
-  <footer class="footer">
-    <p>© 2026 – Tu familia</p>
-  </footer>
+        <div id="medication-cards-container" class="cards-grid">
+          <!-- Las tarjetas de medicamentos se renderizan mediante app.js -->
+        </div>
+      </section>
+
+      <!-- Sección de Ejercicios y Bienestar -->
+      <section class="section-container wellness-section">
+        <div class="section-header">
+          <h2>🧘‍♂️ Bienestar y Ejercicio</h2>
+        </div>
+
+        <div class="wellness-grid">
+          <!-- Tarjeta Ejercicio Om -->
+          <div class="wellness-card om-card">
+            <div class="wellness-icon">🧘‍♂️</div>
+            <div class="wellness-details">
+              <h3>Ejercicio "Om"</h3>
+              <p>Meditación y respiración guiada para relajar mente y cuerpo.</p>
+              <div class="wellness-status" id="om-status">Pendiente hoy</div>
+            </div>
+            <button id="om-action-btn" class="wellness-btn om-btn">
+              <span>Iniciar "Om"</span>
+            </button>
+          </div>
+
+          <!-- Tarjeta Ejercicio Cuerpo -->
+          <div class="wellness-card body-card">
+            <div class="wellness-icon">🏋️‍♂️</div>
+            <div class="wellness-details">
+              <h3>Ejercicio de Cuerpo</h3>
+              <p>Movimiento activo para mantener fuerza y movilidad.</p>
+              <div class="wellness-status" id="body-status">Pendiente hoy</div>
+            </div>
+            <button id="body-action-btn" class="wellness-btn body-btn">
+              <span>Registrar Ejercicio</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal de Ayuda para Instalación -->
+    <div id="install-modal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <button id="close-modal-btn" class="close-modal">&times;</button>
+        <h3>📲 Cómo agregar a tu teléfono</h3>
+        <p class="modal-intro">Sigue estos sencillos pasos según el tipo de tu celular:</p>
+        
+        <div class="instructions-tabs">
+          <div class="instruction-box android-box">
+            <h4>🤖 En Android (Chrome / Edge)</h4>
+            <ol>
+              <li>Toca el botón verde <strong>"Instalar Ahora"</strong> de arriba.</li>
+              <li>Si no aparece, toca los <strong>3 puntos (⋮)</strong> arriba a la derecha.</li>
+              <li>Selecciona <strong>"Agregar a la pantalla principal"</strong> o <strong>"Instalar aplicación"</strong>.</li>
+            </ol>
+          </div>
+
+          <div class="instruction-box ios-box">
+            <h4>🍎 En iPhone / iPad (Safari)</h4>
+            <ol>
+              <li>Toca el botón <strong>Compartir</strong> (cuadrado con flecha ⬆️ abajo).</li>
+              <li>Desliza hacia abajo y toca <strong>"Agregar a inicio"</strong> ➕.</li>
+              <li>Toca <strong>"Agregar"</strong> arriba a la derecha.</li>
+            </ol>
+          </div>
+        </div>
+
+        <button id="understand-btn" class="btn-modal-close">¡Entendido!</button>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <p>Diseñado con ❤️ para Julio</p>
+      <p class="offline-badge">⚡ Funciona dentro y fuera de casa sin internet</p>
+    </footer>
+  </div>
 </body>
 </html>

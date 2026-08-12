@@ -1,126 +1,277 @@
-// app.js – lógica de la aplicación MEDICAMENTOS JULIO
+// app.js - MEDICAMENTOS JULIO
 
-// Registro del Service Worker para modo offline
+// Registrar Service Worker para PWA / Modo Offline
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js')
-      .then(reg => console.log('ServiceWorker registrado', reg.scope))
-      .catch(err => console.error('Error al registrar ServiceWorker', err));
+      .then(reg => console.log('ServiceWorker registrado:', reg.scope))
+      .catch(err => console.error('Error al registrar ServiceWorker:', err));
   });
 }
 
-// Solicitar permiso de notificaciones al iniciar
-if ('Notification' in window) {
-  Notification.requestPermission().then(p => {
-    console.log('Permiso de notificaciones:', p);
-  });
-}
-
-// Lista estática de medicamentos (en español)
-const medicamentos = [
+// Lista de Medicamentos de Julio con información completa
+const MEDICAMENTOS = [
   {
+    id: 'clopidogrel',
     nombre: 'Clopidogrel',
     dosis: '1 comprimido en la comida',
     detalle: 'A media comida.',
-    frecuenciaMs: 24 * 60 * 60 * 1000 // una vez al día
+    horario: 'comida',
+    etiqueta: 'En la comida'
   },
   {
+    id: 'dapagliflozina',
     nombre: 'Dapagliflozina',
     dosis: '1 comprimido en la comida',
     detalle: 'Con el alimento.',
-    frecuenciaMs: 24 * 60 * 60 * 1000
+    horario: 'comida',
+    etiqueta: 'Con alimento'
   },
   {
-    nombre: 'Atorvastatina',
-    dosis: '1 comprimido 80 mg por la noche',
-    detalle: '',
-    frecuenciaMs: 24 * 60 * 60 * 1000
+    id: 'atorvastatina',
+    nombre: 'Atorvastatina 80 mg',
+    dosis: '1 comprimido por la noche',
+    detalle: 'Tomar por la noche.',
+    horario: 'noche',
+    etiqueta: 'Por la noche'
   },
   {
+    id: 'metformina',
     nombre: 'Metformina',
     dosis: '1 comprimido cada 12 hrs',
     detalle: 'Al terminar el alimento.',
-    frecuenciaMs: 12 * 60 * 60 * 1000
+    horario: '12h',
+    etiqueta: 'Cada 12 hrs'
   },
   {
+    id: 'omeprazol',
     nombre: 'Omeprazol',
     dosis: '1 comprimido cada 12 hrs',
     detalle: 'Antes del alimento.',
-    frecuenciaMs: 12 * 60 * 60 * 1000
+    horario: '12h',
+    etiqueta: 'Cada 12 hrs'
   },
   {
+    id: 'temisartan',
     nombre: 'Temisartan',
     dosis: '1 comprimido cada 24 hrs',
-    detalle: '',
-    frecuenciaMs: 24 * 60 * 60 * 1000
+    detalle: 'Tomar 1 vez al día.',
+    horario: '24h',
+    etiqueta: 'Cada 24 hrs'
   }
 ];
 
-// Función para crear la lista en el DOM
-function renderMedicamentos() {
-  const ul = document.getElementById('med-list');
-  ul.innerHTML = '';
-  medicamentos.forEach(med => {
-    const li = document.createElement('li');
-    const id = `med-${med.nombre.replace(/\s+/g, '-').toLowerCase()}`;
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = id;
-    // cargar estado desde localStorage
-    const stored = localStorage.getItem(id);
-    checkbox.checked = stored === 'true';
-    checkbox.addEventListener('change', () => {
-      localStorage.setItem(id, checkbox.checked);
+let activeFilter = 'all';
+let deferredInstallPrompt = null;
+
+// Inicialización de fecha actual
+function updateDateHeader() {
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const today = new Date().toLocaleDateString('es-ES', options);
+  const formattedDate = today.charAt(0).toUpperCase() + today.slice(1);
+  const dateEl = document.getElementById('current-date');
+  if (dateEl) dateEl.textContent = formattedDate;
+}
+
+// Renderizado de lista de tarjetas
+function renderMedicationCards() {
+  const container = document.getElementById('medication-cards-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+  let completedCount = 0;
+
+  MEDICAMENTOS.forEach(med => {
+    const storageKey = `med_${med.id}_${todayKey}`;
+    const isChecked = localStorage.getItem(storageKey) === 'true';
+
+    if (isChecked) completedCount++;
+
+    // Filtrar según pestaña activa
+    if (activeFilter === 'pending' && isChecked) return;
+    if (activeFilter === 'completed' && !isChecked) return;
+
+    const card = document.createElement('div');
+    card.className = `med-card ${isChecked ? 'checked' : ''}`;
+    card.dataset.id = med.id;
+
+    let badgeClass = 'badge-24h';
+    if (med.horario === 'comida') badgeClass = 'badge-comida';
+    else if (med.horario === 'noche') badgeClass = 'badge-noche';
+    else if (med.horario === '12h') badgeClass = 'badge-12h';
+
+    card.innerHTML = `
+      <div class="custom-checkbox">
+        <svg viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="med-info">
+        <div class="med-header-row">
+          <h3 class="med-name">${med.nombre}</h3>
+          <span class="badge-tag ${badgeClass}">${med.etiqueta}</span>
+        </div>
+        <div class="med-dose">💊 ${med.dosis}</div>
+        ${med.detalle ? `<div class="med-detail">💡 ${med.detalle}</div>` : ''}
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      const nextCheckedState = !card.classList.contains('checked');
+      localStorage.setItem(storageKey, nextCheckedState);
+      renderMedicationCards();
     });
-    const label = document.createElement('label');
-    label.htmlFor = id;
-    label.textContent = `${med.nombre}: ${med.dosis}` + (med.detalle ? ` (${med.detalle})` : '');
-    li.appendChild(checkbox);
-    li.appendChild(label);
-    ul.appendChild(li);
+
+    container.appendChild(card);
   });
+
+  updateProgressBar(completedCount, MEDICAMENTOS.length);
 }
 
-// Programar notificaciones periódicas para cada medicamento
-function scheduleMedicationNotifications() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+// Actualizar barra de progreso
+function updateProgressBar(completed, total) {
+  const percent = Math.round((completed / total) * 100);
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const progressSubtitle = document.getElementById('progress-subtitle');
 
-  medicamentos.forEach(med => {
-    // Usamos setInterval para simular recordatorios cada frecuencia
-    setInterval(() => {
-      new Notification('Recordatorio de medicamento', {
-        body: `${med.nombre}: ${med.dosis}`,
-        icon: 'icons/icon-192.png'
-      });
-    }, med.frecuenciaMs);
-  });
-}
-
-// Recordatorios de ejercicio y "om"
-function setupExerciseButtons() {
-  const ejercicioBtn = document.getElementById('ejercicio-btn');
-  const omBtn = document.getElementById('om-btn');
-
-  ejercicioBtn.addEventListener('click', () => {
-    if (Notification.permission === 'granted') {
-      new Notification('Ejercicio', { body: '¡Es hora de hacer ejercicio de cuerpo!', icon: 'icons/icon-192.png' });
+  if (progressBar) progressBar.style.width = `${percent}%`;
+  if (progressText) progressText.textContent = `${percent}%`;
+  if (progressSubtitle) {
+    if (completed === total) {
+      progressSubtitle.textContent = '🎉 ¡Excelente! Has tomado todos los medicamentos de hoy.';
     } else {
-      alert('¡Hora de hacer ejercicio de cuerpo!');
+      progressSubtitle.textContent = `${completed} de ${total} medicamentos tomados hoy`;
     }
-  });
+  }
+}
 
-  omBtn.addEventListener('click', () => {
-    if (Notification.permission === 'granted') {
-      new Notification('Meditación "om"', { body: 'Dedica unos minutos a tu práctica de "om".', icon: 'icons/icon-192.png' });
-    } else {
-      alert('Dedica unos minutos a tu práctica de "om".');
-    }
+// Configurar Pestañas de Filtro
+function setupTabs() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeFilter = tab.dataset.filter;
+      renderMedicationCards();
+    });
   });
 }
 
-// Inicialización
+// Botón de Reiniciar Día
+function setupResetButton() {
+  const resetBtn = document.getElementById('reset-day-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (confirm('¿Deseas reiniciar la lista de chequeo para el día de hoy?')) {
+        const todayKey = new Date().toISOString().slice(0, 10);
+        MEDICAMENTOS.forEach(med => {
+          localStorage.removeItem(`med_${med.id}_${todayKey}`);
+        });
+        renderMedicationCards();
+      }
+    });
+  }
+}
+
+// Captura de Evento de Instalación PWA (Promot de 1 Clic)
+function setupInstallPrompt() {
+  const installBanner = document.getElementById('install-banner');
+  const installAppBtn = document.getElementById('install-app-btn');
+  const installHeaderBtn = document.getElementById('install-header-btn');
+  const showHelpBtn = document.getElementById('show-help-btn');
+  const modal = document.getElementById('install-modal');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  const understandBtn = document.getElementById('understand-btn');
+
+  // Si ya se ejecuta como PWA instalada, ocultar banners
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (installBanner) installBanner.classList.add('hidden');
+    if (installHeaderBtn) installHeaderBtn.classList.add('hidden');
+    return;
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    if (installBanner) installBanner.classList.remove('hidden');
+    if (installHeaderBtn) installHeaderBtn.classList.remove('hidden');
+  });
+
+  const triggerInstall = async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        if (installBanner) installBanner.classList.add('hidden');
+        if (installHeaderBtn) installHeaderBtn.classList.add('hidden');
+      }
+      deferredInstallPrompt = null;
+    } else {
+      // Si el navegador no soporta el prompt directo (como Safari en iOS), mostrar modal de ayuda
+      if (modal) modal.classList.remove('hidden');
+    }
+  };
+
+  if (installAppBtn) installAppBtn.addEventListener('click', triggerInstall);
+  if (installHeaderBtn) installHeaderBtn.addEventListener('click', triggerInstall);
+
+  if (showHelpBtn) {
+    showHelpBtn.addEventListener('click', () => {
+      if (modal) modal.classList.remove('hidden');
+    });
+  }
+
+  const closeModal = () => {
+    if (modal) modal.classList.add('hidden');
+  };
+
+  if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+  if (understandBtn) understandBtn.addEventListener('click', closeModal);
+}
+
+// Configurar Botones de Ejercicio & Om
+function setupWellnessSection() {
+  const omBtn = document.getElementById('om-action-btn');
+  const bodyBtn = document.getElementById('body-action-btn');
+  const omStatus = document.getElementById('om-status');
+  const bodyStatus = document.getElementById('body-status');
+
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  if (localStorage.getItem(`om_${todayKey}`) === 'completed') {
+    if (omStatus) omStatus.textContent = '✅ Realizado hoy';
+  }
+  if (localStorage.getItem(`body_${todayKey}`) === 'completed') {
+    if (bodyStatus) bodyStatus.textContent = '✅ Realizado hoy';
+  }
+
+  if (omBtn) {
+    omBtn.addEventListener('click', () => {
+      alert('🧘‍♂️ Inicia 5 minutos de respiración consciente "Om". Inhala profundo y exhala suavemente.');
+      localStorage.setItem(`om_${todayKey}`, 'completed');
+      if (omStatus) omStatus.textContent = '✅ Realizado hoy';
+    });
+  }
+
+  if (bodyBtn) {
+    bodyBtn.addEventListener('click', () => {
+      alert('🏋️‍♂️ ¡Felicidades! Has completado tu rutina de ejercicio de cuerpo.');
+      localStorage.setItem(`body_${todayKey}`, 'completed');
+      if (bodyStatus) bodyStatus.textContent = '✅ Realizado hoy';
+    });
+  }
+}
+
+// Inicialización de la aplicación
 document.addEventListener('DOMContentLoaded', () => {
-  renderMedicamentos();
-  scheduleMedicationNotifications();
-  setupExerciseButtons();
+  updateDateHeader();
+  renderMedicationCards();
+  setupTabs();
+  setupResetButton();
+  setupInstallPrompt();
+  setupWellnessSection();
 });
