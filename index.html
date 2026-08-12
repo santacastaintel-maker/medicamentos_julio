@@ -24,7 +24,7 @@
           <div class="avatar">👨‍🦳</div>
           <div>
             <h1 class="app-title">Medicamentos Julio</h1>
-            <p class="today-date" id="current-date">Cargando fecha...</p>
+            <p class="today-date" id="current-date">Hoy</p>
           </div>
         </div>
         <button id="install-header-btn" class="install-btn">
@@ -63,11 +63,11 @@
     <!-- Pestañas de Navegación Rápida -->
     <nav class="nav-tabs">
       <button class="tab-btn active" data-filter="all">Todos (6)</button>
-      <button class="tab-btn" data-filter="pending" id="tab-pending">Pendientes</button>
-      <button class="tab-btn" data-filter="completed" id="tab-completed">Completados</button>
+      <button class="tab-btn" data-filter="pending" id="tab-pending">Pendientes (6)</button>
+      <button class="tab-btn" data-filter="completed" id="tab-completed">Completados (0)</button>
     </nav>
 
-    <!-- Lista de Medicamentos -->
+    <!-- Lista de Medicamentos (Con respaldo HTML estático) -->
     <main class="main-content">
       <section class="section-container">
         <div class="section-header">
@@ -76,7 +76,95 @@
         </div>
 
         <div id="medication-cards-container" class="cards-grid">
-          <!-- Tarjetas renderizadas en app.js -->
+          <!-- Medicamento 1: Clopidogrel -->
+          <div class="med-card" data-id="clopidogrel">
+            <div class="custom-checkbox">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="med-info">
+              <div class="med-header-row">
+                <h3 class="med-name">Clopidogrel</h3>
+                <span class="badge-tag badge-comida">En la comida</span>
+              </div>
+              <div class="med-dose">💊 1 comprimido en la comida</div>
+              <div class="med-detail">💡 A media comida.</div>
+            </div>
+          </div>
+
+          <!-- Medicamento 2: Dapagliflozina -->
+          <div class="med-card" data-id="dapagliflozina">
+            <div class="custom-checkbox">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="med-info">
+              <div class="med-header-row">
+                <h3 class="med-name">Dapagliflozina</h3>
+                <span class="badge-tag badge-comida">Con alimento</span>
+              </div>
+              <div class="med-dose">💊 1 comprimido en la comida</div>
+              <div class="med-detail">💡 Con el alimento.</div>
+            </div>
+          </div>
+
+          <!-- Medicamento 3: Atorvastatina -->
+          <div class="med-card" data-id="atorvastatina">
+            <div class="custom-checkbox">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="med-info">
+              <div class="med-header-row">
+                <h3 class="med-name">Atorvastatina 80 mg</h3>
+                <span class="badge-tag badge-noche">Por la noche</span>
+              </div>
+              <div class="med-dose">💊 1 comprimido por la noche</div>
+              <div class="med-detail">💡 Tomar por la noche.</div>
+            </div>
+          </div>
+
+          <!-- Medicamento 4: Metformina -->
+          <div class="med-card" data-id="metformina">
+            <div class="custom-checkbox">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="med-info">
+              <div class="med-header-row">
+                <h3 class="med-name">Metformina</h3>
+                <span class="badge-tag badge-12h">Cada 12 hrs</span>
+              </div>
+              <div class="med-dose">💊 1 comprimido cada 12 hrs</div>
+              <div class="med-detail">💡 Al terminar el alimento.</div>
+            </div>
+          </div>
+
+          <!-- Medicamento 5: Omeprazol -->
+          <div class="med-card" data-id="omeprazol">
+            <div class="custom-checkbox">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="med-info">
+              <div class="med-header-row">
+                <h3 class="med-name">Omeprazol</h3>
+                <span class="badge-tag badge-12h">Cada 12 hrs</span>
+              </div>
+              <div class="med-dose">💊 1 comprimido cada 12 hrs</div>
+              <div class="med-detail">💡 Antes del alimento.</div>
+            </div>
+          </div>
+
+          <!-- Medicamento 6: Temisartan -->
+          <div class="med-card" data-id="temisartan">
+            <div class="custom-checkbox">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="med-info">
+              <div class="med-header-row">
+                <h3 class="med-name">Temisartan</h3>
+                <span class="badge-tag badge-24h">Cada 24 hrs</span>
+              </div>
+              <div class="med-dose">💊 1 comprimido cada 24 hrs</div>
+              <div class="med-detail">💡 Tomar 1 vez al día.</div>
+            </div>
+          </div>
         </div>
       </section>
 

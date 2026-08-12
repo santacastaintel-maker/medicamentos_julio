@@ -1,4 +1,4 @@
-// app.js - MEDICAMENTOS JULIO
+// app.js - MEDICAMENTOS JULIO (Robusto & Anti-Fallos)
 
 // Registrar Service Worker para PWA / Modo Offline
 if ('serviceWorker' in navigator) {
@@ -9,7 +9,33 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Lista de Medicamentos de Julio con información completa
+// Helpers ultra-seguros para Storage
+function safeGetStorage(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (e) {
+    console.warn('Storage read warning:', e);
+    return null;
+  }
+}
+
+function safeSetStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.warn('Storage write warning:', e);
+  }
+}
+
+function safeRemoveStorage(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.warn('Storage remove warning:', e);
+  }
+}
+
+// Lista de Medicamentos de Julio
 const MEDICAMENTOS = [
   {
     id: 'clopidogrel',
@@ -102,7 +128,7 @@ function renderMedicationCards() {
 
   MEDICAMENTOS.forEach(med => {
     const storageKey = `med_${med.id}_${todayKey}`;
-    const isChecked = localStorage.getItem(storageKey) === 'true';
+    const isChecked = safeGetStorage(storageKey) === 'true';
 
     if (isChecked) completedCount++;
 
@@ -139,7 +165,7 @@ function renderMedicationCards() {
 
     card.addEventListener('click', () => {
       const nextCheckedState = !isChecked;
-      localStorage.setItem(storageKey, nextCheckedState);
+      safeSetStorage(storageKey, nextCheckedState);
       renderMedicationCards();
       if (nextCheckedState) {
         showToast(`✅ ${med.nombre} marcado como tomado`);
@@ -217,7 +243,7 @@ function setupResetButton() {
     resetBtn.addEventListener('click', () => {
       const todayKey = new Date().toISOString().slice(0, 10);
       MEDICAMENTOS.forEach(med => {
-        localStorage.removeItem(`med_${med.id}_${todayKey}`);
+        safeRemoveStorage(`med_${med.id}_${todayKey}`);
       });
       renderMedicationCards();
       showToast('🔄 Se reinició el registro de hoy');
@@ -241,12 +267,16 @@ function setupInstallPrompt() {
 
   const openInstall = async () => {
     if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      const { outcome } = await deferredInstallPrompt.userChoice;
-      if (outcome === 'accepted') {
-        showToast('🎉 ¡Gracias por instalar Medicamentos Julio!');
+      try {
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          showToast('🎉 ¡Gracias por instalar Medicamentos Julio!');
+        }
+        deferredInstallPrompt = null;
+      } catch (err) {
+        if (modal) modal.classList.remove('hidden');
       }
-      deferredInstallPrompt = null;
     } else {
       if (modal) modal.classList.remove('hidden');
     }
@@ -282,10 +312,10 @@ function setupWellnessSection() {
 
   const todayKey = new Date().toISOString().slice(0, 10);
 
-  if (localStorage.getItem(`om_${todayKey}`) === 'completed') {
+  if (safeGetStorage(`om_${todayKey}`) === 'completed') {
     if (omStatus) omStatus.textContent = '✅ Realizado hoy';
   }
-  if (localStorage.getItem(`body_${todayKey}`) === 'completed') {
+  if (safeGetStorage(`body_${todayKey}`) === 'completed') {
     if (bodyStatus) bodyStatus.textContent = '✅ Realizado hoy';
   }
 
@@ -304,7 +334,7 @@ function setupWellnessSection() {
 
   if (finishOmBtn) {
     finishOmBtn.addEventListener('click', () => {
-      localStorage.setItem(`om_${todayKey}`, 'completed');
+      safeSetStorage(`om_${todayKey}`, 'completed');
       if (omStatus) omStatus.textContent = '✅ Realizado hoy';
       if (omModal) omModal.classList.add('hidden');
       showToast('🧘‍♂️ ¡Excelente práctica de "Om" completada!');
@@ -314,19 +344,25 @@ function setupWellnessSection() {
   // Body exercise
   if (bodyBtn) {
     bodyBtn.addEventListener('click', () => {
-      localStorage.setItem(`body_${todayKey}`, 'completed');
+      safeSetStorage(`body_${todayKey}`, 'completed');
       if (bodyStatus) bodyStatus.textContent = '✅ Realizado hoy';
       showToast('🏋️‍♂️ ¡Ejercicio de cuerpo registrado hoy!');
     });
   }
 }
 
-// Inicialización de la aplicación
-document.addEventListener('DOMContentLoaded', () => {
+// Inicialización garantizada de la aplicación
+function initApp() {
   updateDateHeader();
   renderMedicationCards();
   setupTabs();
   setupResetButton();
   setupInstallPrompt();
   setupWellnessSection();
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}

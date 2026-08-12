@@ -1,21 +1,25 @@
 {
-  "name": "MEDICAMENTOS JULIO",
-  "short_name": "MEDICAMENTOS",
-  "description": "Aplicación de recordatorio de medicamentos y ejercicios",
-  "start_url": ".",
+  "name": "Medicamentos Julio",
+  "short_name": "Medicamentos",
+  "description": "Lista de chequeo y recordatorios de medicamentos para Julio",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#00bfa5",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#0d9488",
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
