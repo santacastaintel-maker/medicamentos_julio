@@ -63,6 +63,22 @@ const MEDICAMENTOS = [
 
 let activeFilter = 'all';
 let deferredInstallPrompt = null;
+let toastTimeout = null;
+
+// Mostrar notificación flotante (Toast)
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toast-message');
+  if (!toast || !toastMessage) return;
+
+  toastMessage.textContent = message;
+  toast.classList.remove('hidden');
+
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 2800);
+}
 
 // Inicialización de fecha actual
 function updateDateHeader() {
@@ -82,6 +98,7 @@ function renderMedicationCards() {
 
   const todayKey = new Date().toISOString().slice(0, 10);
   let completedCount = 0;
+  let visibleCardsCount = 0;
 
   MEDICAMENTOS.forEach(med => {
     const storageKey = `med_${med.id}_${todayKey}`;
@@ -92,6 +109,8 @@ function renderMedicationCards() {
     // Filtrar según pestaña activa
     if (activeFilter === 'pending' && isChecked) return;
     if (activeFilter === 'completed' && !isChecked) return;
+
+    visibleCardsCount++;
 
     const card = document.createElement('div');
     card.className = `med-card ${isChecked ? 'checked' : ''}`;
@@ -119,15 +138,45 @@ function renderMedicationCards() {
     `;
 
     card.addEventListener('click', () => {
-      const nextCheckedState = !card.classList.contains('checked');
+      const nextCheckedState = !isChecked;
       localStorage.setItem(storageKey, nextCheckedState);
       renderMedicationCards();
+      if (nextCheckedState) {
+        showToast(`✅ ${med.nombre} marcado como tomado`);
+      } else {
+        showToast(`🔄 ${med.nombre} desmarcado`);
+      }
     });
 
     container.appendChild(card);
   });
 
+  // Si no hay tarjetas en el filtro actual, mostrar estado vacío
+  if (visibleCardsCount === 0) {
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'empty-state';
+    if (activeFilter === 'pending') {
+      emptyDiv.innerHTML = `<div class="empty-state-icon">🎉</div><p><strong>¡Excelente!</strong> No tienes medicamentos pendientes por tomar hoy.</p>`;
+    } else if (activeFilter === 'completed') {
+      emptyDiv.innerHTML = `<div class="empty-state-icon">📋</div><p>Aún no has marcado ningún medicamento como tomado hoy.</p>`;
+    } else {
+      emptyDiv.innerHTML = `<div class="empty-state-icon">💊</div><p>No se encontraron medicamentos.</p>`;
+    }
+    container.appendChild(emptyDiv);
+  }
+
+  updateTabLabels(completedCount, MEDICAMENTOS.length);
   updateProgressBar(completedCount, MEDICAMENTOS.length);
+}
+
+// Actualizar etiquetas de pestañas
+function updateTabLabels(completed, total) {
+  const pendingCount = total - completed;
+  const tabPending = document.getElementById('tab-pending');
+  const tabCompleted = document.getElementById('tab-completed');
+  
+  if (tabPending) tabPending.textContent = `Pendientes (${pendingCount})`;
+  if (tabCompleted) tabCompleted.textContent = `Completados (${completed})`;
 }
 
 // Actualizar barra de progreso
@@ -141,7 +190,7 @@ function updateProgressBar(completed, total) {
   if (progressText) progressText.textContent = `${percent}%`;
   if (progressSubtitle) {
     if (completed === total) {
-      progressSubtitle.textContent = '🎉 ¡Excelente! Has tomado todos los medicamentos de hoy.';
+      progressSubtitle.textContent = '🎉 ¡Felicitaciones! Has tomado todos los medicamentos del día.';
     } else {
       progressSubtitle.textContent = `${completed} de ${total} medicamentos tomados hoy`;
     }
@@ -152,7 +201,7 @@ function updateProgressBar(completed, total) {
 function setupTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
   tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
+    tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       activeFilter = tab.dataset.filter;
@@ -166,20 +215,18 @@ function setupResetButton() {
   const resetBtn = document.getElementById('reset-day-btn');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      if (confirm('¿Deseas reiniciar la lista de chequeo para el día de hoy?')) {
-        const todayKey = new Date().toISOString().slice(0, 10);
-        MEDICAMENTOS.forEach(med => {
-          localStorage.removeItem(`med_${med.id}_${todayKey}`);
-        });
-        renderMedicationCards();
-      }
+      const todayKey = new Date().toISOString().slice(0, 10);
+      MEDICAMENTOS.forEach(med => {
+        localStorage.removeItem(`med_${med.id}_${todayKey}`);
+      });
+      renderMedicationCards();
+      showToast('🔄 Se reinició el registro de hoy');
     });
   }
 }
 
-// Captura de Evento de Instalación PWA (Promot de 1 Clic)
+// Captura e interacción de Instalación PWA
 function setupInstallPrompt() {
-  const installBanner = document.getElementById('install-banner');
   const installAppBtn = document.getElementById('install-app-btn');
   const installHeaderBtn = document.getElementById('install-header-btn');
   const showHelpBtn = document.getElementById('show-help-btn');
@@ -187,37 +234,26 @@ function setupInstallPrompt() {
   const closeModalBtn = document.getElementById('close-modal-btn');
   const understandBtn = document.getElementById('understand-btn');
 
-  // Si ya se ejecuta como PWA instalada, ocultar banners
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    if (installBanner) installBanner.classList.add('hidden');
-    if (installHeaderBtn) installHeaderBtn.classList.add('hidden');
-    return;
-  }
-
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    if (installBanner) installBanner.classList.remove('hidden');
-    if (installHeaderBtn) installHeaderBtn.classList.remove('hidden');
   });
 
-  const triggerInstall = async () => {
+  const openInstall = async () => {
     if (deferredInstallPrompt) {
       deferredInstallPrompt.prompt();
       const { outcome } = await deferredInstallPrompt.userChoice;
       if (outcome === 'accepted') {
-        if (installBanner) installBanner.classList.add('hidden');
-        if (installHeaderBtn) installHeaderBtn.classList.add('hidden');
+        showToast('🎉 ¡Gracias por instalar Medicamentos Julio!');
       }
       deferredInstallPrompt = null;
     } else {
-      // Si el navegador no soporta el prompt directo (como Safari en iOS), mostrar modal de ayuda
       if (modal) modal.classList.remove('hidden');
     }
   };
 
-  if (installAppBtn) installAppBtn.addEventListener('click', triggerInstall);
-  if (installHeaderBtn) installHeaderBtn.addEventListener('click', triggerInstall);
+  if (installAppBtn) installAppBtn.addEventListener('click', openInstall);
+  if (installHeaderBtn) installHeaderBtn.addEventListener('click', openInstall);
 
   if (showHelpBtn) {
     showHelpBtn.addEventListener('click', () => {
@@ -240,6 +276,10 @@ function setupWellnessSection() {
   const omStatus = document.getElementById('om-status');
   const bodyStatus = document.getElementById('body-status');
 
+  const omModal = document.getElementById('om-modal');
+  const closeOmModal = document.getElementById('close-om-modal');
+  const finishOmBtn = document.getElementById('finish-om-btn');
+
   const todayKey = new Date().toISOString().slice(0, 10);
 
   if (localStorage.getItem(`om_${todayKey}`) === 'completed') {
@@ -249,19 +289,34 @@ function setupWellnessSection() {
     if (bodyStatus) bodyStatus.textContent = '✅ Realizado hoy';
   }
 
+  // Om Modal
   if (omBtn) {
     omBtn.addEventListener('click', () => {
-      alert('🧘‍♂️ Inicia 5 minutos de respiración consciente "Om". Inhala profundo y exhala suavemente.');
-      localStorage.setItem(`om_${todayKey}`, 'completed');
-      if (omStatus) omStatus.textContent = '✅ Realizado hoy';
+      if (omModal) omModal.classList.remove('hidden');
     });
   }
 
+  if (closeOmModal) {
+    closeOmModal.addEventListener('click', () => {
+      if (omModal) omModal.classList.add('hidden');
+    });
+  }
+
+  if (finishOmBtn) {
+    finishOmBtn.addEventListener('click', () => {
+      localStorage.setItem(`om_${todayKey}`, 'completed');
+      if (omStatus) omStatus.textContent = '✅ Realizado hoy';
+      if (omModal) omModal.classList.add('hidden');
+      showToast('🧘‍♂️ ¡Excelente práctica de "Om" completada!');
+    });
+  }
+
+  // Body exercise
   if (bodyBtn) {
     bodyBtn.addEventListener('click', () => {
-      alert('🏋️‍♂️ ¡Felicidades! Has completado tu rutina de ejercicio de cuerpo.');
       localStorage.setItem(`body_${todayKey}`, 'completed');
       if (bodyStatus) bodyStatus.textContent = '✅ Realizado hoy';
+      showToast('🏋️‍♂️ ¡Ejercicio de cuerpo registrado hoy!');
     });
   }
 }

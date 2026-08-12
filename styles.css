@@ -122,8 +122,8 @@ body {
   transition: all 0.2s;
 }
 
-.install-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+.install-btn:active {
+  transform: scale(0.95);
 }
 
 /* Card de Progreso */
@@ -225,7 +225,10 @@ body {
   font-size: 0.9rem;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
+}
 
+.btn-primary-install:active {
+  transform: scale(0.97);
 }
 
 .btn-secondary-install {
@@ -298,15 +301,29 @@ body {
   cursor: pointer;
 }
 
-.reset-btn:hover {
+.reset-btn:active {
   background: #ffffff;
-  color: var(--text-main);
+  transform: scale(0.95);
 }
 
 .cards-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-light);
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
 }
 
 /* Tarjeta individual de medicamento */
@@ -323,16 +340,16 @@ body {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  user-select: none;
 }
 
-.med-card:hover {
-  box-shadow: var(--shadow-md);
+.med-card:active {
+  transform: scale(0.99);
 }
 
 .med-card.checked {
   background: #f8fafc;
   border-color: var(--success);
-  opacity: 0.85;
 }
 
 .med-card.checked::before {
@@ -341,14 +358,14 @@ body {
   left: 0;
   top: 0;
   bottom: 0;
-  width: 5px;
+  width: 6px;
   background: var(--success);
 }
 
 /* Custom Checkbox */
 .custom-checkbox {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid #cbd5e1;
   display: flex;
@@ -357,25 +374,25 @@ body {
   flex-shrink: 0;
   margin-top: 2px;
   transition: all 0.2s;
+  background: #ffffff;
 }
 
 .med-card.checked .custom-checkbox {
   background: var(--success);
   border-color: var(--success);
-  color: white;
 }
 
 .custom-checkbox svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   stroke: white;
-  stroke-width: 3;
+  stroke-width: 3.2;
   stroke-linecap: round;
   stroke-linejoin: round;
   fill: none;
   opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.2s;
+  transform: scale(0.4);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .med-card.checked .custom-checkbox svg {
@@ -410,7 +427,7 @@ body {
 .badge-tag {
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -506,7 +523,7 @@ body {
 }
 
 .wellness-status {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--primary);
   margin-top: 4px;
@@ -514,17 +531,17 @@ body {
 
 .wellness-btn {
   border: none;
-  padding: 8px 14px;
+  padding: 10px 16px;
   border-radius: var(--radius-sm);
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
+  transition: transform 0.1s;
   white-space: nowrap;
 }
 
 .wellness-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
 .om-btn {
@@ -537,13 +554,34 @@ body {
   color: white;
 }
 
-/* Modal de Ayuda */
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  z-index: 200;
+  animation: toastUp 0.3s ease-out;
+}
+
+@keyframes toastUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Modales */
+.text-center { text-align: center; }
+
 .modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(6px);
   z-index: 100;
@@ -566,10 +604,8 @@ body {
 
 .close-modal {
   position: absolute;
-  top: 14px;
-  right: 18px;
-  background: none;
-  border: none;
+  top: 14px; right: 18px;
+  background: none; border: none;
   font-size: 26px;
   color: var(--text-muted);
   cursor: pointer;
@@ -604,7 +640,7 @@ body {
   padding-left: 18px;
   font-size: 0.83rem;
   color: #334155;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .btn-modal-close {
@@ -616,8 +652,45 @@ body {
   border-radius: var(--radius-sm);
   font-weight: 700;
   font-size: 0.95rem;
-  margin-top: 8px;
+  margin-top: 12px;
   cursor: pointer;
+}
+
+.btn-modal-close:active {
+  transform: scale(0.98);
+}
+
+/* Animación Om Breathe Circle */
+.om-modal-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.om-breathe-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #c084fc);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  font-size: 1.1rem;
+  font-weight: 800;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  animation: pulseBreathe 4s infinite ease-in-out;
+}
+
+@keyframes pulseBreathe {
+  0%, 100% { transform: scale(0.9); }
+  50% { transform: scale(1.15); box-shadow: 0 0 40px rgba(139, 92, 246, 0.7); }
+}
+
+.om-timer-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
 }
 
 .hidden {

@@ -27,7 +27,7 @@
             <p class="today-date" id="current-date">Cargando fecha...</p>
           </div>
         </div>
-        <button id="install-header-btn" class="install-btn hidden">
+        <button id="install-header-btn" class="install-btn">
           <span>📲 Instalar</span>
         </button>
       </div>
@@ -50,12 +50,12 @@
       <div class="install-banner-content">
         <div class="install-icon">📲</div>
         <div class="install-text">
-          <h3>¡Instálala en tu teléfono!</h3>
-          <p>Para abrirla con un solo toque sin buscar el enlace.</p>
+          <h3>¡Agrégala a tu celular!</h3>
+          <p>Para abrirla en 1 segundo dentro y fuera de casa.</p>
         </div>
       </div>
       <div class="install-actions">
-        <button id="install-app-btn" class="btn-primary-install">Instalar Ahora</button>
+        <button id="install-app-btn" class="btn-primary-install">Instalar / Agregar</button>
         <button id="show-help-btn" class="btn-secondary-install">¿Cómo instalar?</button>
       </div>
     </section>
@@ -63,8 +63,8 @@
     <!-- Pestañas de Navegación Rápida -->
     <nav class="nav-tabs">
       <button class="tab-btn active" data-filter="all">Todos (6)</button>
-      <button class="tab-btn" data-filter="pending">Pendientes</button>
-      <button class="tab-btn" data-filter="completed">Completados</button>
+      <button class="tab-btn" data-filter="pending" id="tab-pending">Pendientes</button>
+      <button class="tab-btn" data-filter="completed" id="tab-completed">Completados</button>
     </nav>
 
     <!-- Lista de Medicamentos -->
@@ -76,7 +76,7 @@
         </div>
 
         <div id="medication-cards-container" class="cards-grid">
-          <!-- Las tarjetas de medicamentos se renderizan mediante app.js -->
+          <!-- Tarjetas renderizadas en app.js -->
         </div>
       </section>
 
@@ -96,7 +96,7 @@
               <div class="wellness-status" id="om-status">Pendiente hoy</div>
             </div>
             <button id="om-action-btn" class="wellness-btn om-btn">
-              <span>Iniciar "Om"</span>
+              <span>Realizar "Om"</span>
             </button>
           </div>
 
@@ -116,20 +116,25 @@
       </section>
     </main>
 
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="toast hidden">
+      <span id="toast-message">Mensaje de notificación</span>
+    </div>
+
     <!-- Modal de Ayuda para Instalación -->
     <div id="install-modal" class="modal-backdrop hidden">
       <div class="modal-card">
         <button id="close-modal-btn" class="close-modal">&times;</button>
-        <h3>📲 Cómo agregar a tu teléfono</h3>
-        <p class="modal-intro">Sigue estos sencillos pasos según el tipo de tu celular:</p>
+        <h3>📲 Cómo instalar la App en tu celular</h3>
+        <p class="modal-intro">Sigue estos sencillos pasos según tu teléfono:</p>
         
         <div class="instructions-tabs">
           <div class="instruction-box android-box">
             <h4>🤖 En Android (Chrome / Edge)</h4>
             <ol>
-              <li>Toca el botón verde <strong>"Instalar Ahora"</strong> de arriba.</li>
-              <li>Si no aparece, toca los <strong>3 puntos (⋮)</strong> arriba a la derecha.</li>
+              <li>Toca los <strong>3 puntos (⋮)</strong> arriba a la derecha en tu navegador.</li>
               <li>Selecciona <strong>"Agregar a la pantalla principal"</strong> o <strong>"Instalar aplicación"</strong>.</li>
+              <li>¡Listo! Aparecerá en tus aplicaciones.</li>
             </ol>
           </div>
 
@@ -137,13 +142,26 @@
             <h4>🍎 En iPhone / iPad (Safari)</h4>
             <ol>
               <li>Toca el botón <strong>Compartir</strong> (cuadrado con flecha ⬆️ abajo).</li>
-              <li>Desliza hacia abajo y toca <strong>"Agregar a inicio"</strong> ➕.</li>
+              <li>Selecciona <strong>"Agregar a inicio"</strong> ➕.</li>
               <li>Toca <strong>"Agregar"</strong> arriba a la derecha.</li>
             </ol>
           </div>
         </div>
 
         <button id="understand-btn" class="btn-modal-close">¡Entendido!</button>
+      </div>
+    </div>
+
+    <!-- Modal para Meditación "Om" -->
+    <div id="om-modal" class="modal-backdrop hidden">
+      <div class="modal-card text-center">
+        <button id="close-om-modal" class="close-modal">&times;</button>
+        <div class="om-modal-icon">🧘‍♂️</div>
+        <h3>Sesión de Respiración "Om"</h3>
+        <p class="modal-intro">Siéntate cómodo, cierra los ojos e inhala profundo...</p>
+        <div class="om-breathe-circle" id="breathe-circle">Inhala</div>
+        <p id="om-timer-text" class="om-timer-text">Respirando en calma...</p>
+        <button id="finish-om-btn" class="btn-modal-close">Completar Práctica "Om"</button>
       </div>
     </div>
 
