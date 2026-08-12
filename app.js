@@ -35,7 +35,7 @@ function safeRemoveStorage(key) {
   }
 }
 
-// Lista de Medicamentos de Julio
+// Lista Completa de Medicamentos de Julio (7 Medicamentos)
 const MEDICAMENTOS = [
   {
     id: 'clopidogrel',
@@ -84,6 +84,14 @@ const MEDICAMENTOS = [
     detalle: 'Tomar 1 vez al día.',
     horario: '24h',
     etiqueta: 'Cada 24 hrs'
+  },
+  {
+    id: 'sucralfato',
+    nombre: 'Sucralfato',
+    dosis: '1 en la mañana y 1 en la noche',
+    detalle: 'Con los alimentos.',
+    horario: '12h',
+    etiqueta: 'Mañana y Noche'
   }
 ];
 
